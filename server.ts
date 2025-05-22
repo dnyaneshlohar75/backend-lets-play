@@ -5,10 +5,7 @@ import { setupSocketIO } from "./Routes/ws";
 
 import userRoutes from "./Routes/user";
 import matchesRoutes from "./Routes/matches";
-
-import { initKafkaConsumer } from "./utils/consumer";
 import groundRoutes from "./Routes/grounds";
-import { redis } from "./Configuration/redis.config";
 
 dotenv.config();
 
@@ -26,14 +23,6 @@ app.use(express.json());
 app.use("/api/user/", userRoutes);
 app.use("/api/matches/", matchesRoutes);
 app.use("/api/grounds/", groundRoutes);
-
-// initKafkaConsumer().then((res) => {
-//   // console.log(res)
-// }).catch((err) => {
-//   console.log(err)
-// });
-
-// redis.connect();
 
 setupSocketIO(server);
 

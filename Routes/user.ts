@@ -12,8 +12,8 @@ userRoutes.post("/auth/register", createNewAccount);
 /* USER ROUTES */
 userRoutes.get('/:userId', authenticateUser, User.getUserDetailsById);
 userRoutes.get('/:userId/settings', authenticateUser, User.getUserSettings);
+userRoutes.put('/:userId/settings', authenticateUser, User.updateUserSettings);
 
-userRoutes.post('/:userId/settings', authenticateUser, User.updateUserSettings);
 userRoutes.post('/:userId/upload/profile_img', authenticateUser, User.uploadProfileImage);
 userRoutes.put('/:userId/update', authenticateUser, User.updateUserDetails);
 

@@ -44,7 +44,7 @@ export async function createNewAccount(req: Request, res: Response) {
 
         const encryptedPassword = bcrypt.hashSync(password, 18);
 
-        await db.user.create({
+        const newUser = await db.user.create({
             data: {
                 username,
                 emailAddress: emailId,
@@ -53,6 +53,16 @@ export async function createNewAccount(req: Request, res: Response) {
                 profileImageUrl: ""
             }
         })
+
+        const userSettings = await db.userSettings.create({
+            data: {
+                userId: newUser.userId,
+                emailService: true,
+                locationService: false,
+                notificationService: false
+            },
+
+        });
 
         res.json({ message: "User is created" }).status(200);
     } catch (error) {
