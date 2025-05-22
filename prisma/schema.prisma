@@ -1,0 +1,170 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum sports {
+  cricket
+  football
+  basketball
+  badminton
+  tabletennis
+}
+
+enum bookingStatus {
+  available
+  pending
+  confirmed
+  completed
+  cancelled
+}
+
+enum paymentStatus {
+  pending
+  paid
+  failed
+}
+
+model user {
+  userId          String            @id @default(uuid())
+  name            String
+  username        String
+  emailAddress    String            @unique
+  mobileNumber    String?
+  password        String
+  dateOfBirth     DateTime?
+  gender          String?
+  profileImageUrl String?           @default("https://images.vexels.com/content/154255/preview/cat-animal-avatar-8eb2ea.png")
+  address         String?
+  city            String?
+  userSettings    userSettings[]
+  groundBooking   groundBooking[]
+  createdAt       DateTime          @default(now())
+  matches         matches[]
+  teamMembers     teamMembers[]
+  groundRating    groundRating[]
+  pendingRequests pendingRequests[]
+}
+
+model userSettings {
+  settingId           String  @id @default(uuid())
+  emailService        Boolean @default(false)
+  notificationService Boolean @default(false)
+  locationService     Boolean @default(false)
+  userId              String
+  user                user    @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@unique([userId])
+}
+
+model ground {
+  groundId      String          @id @default(uuid())
+  name          String
+  description   String?
+  latitude      String
+  longitude     String
+  address       String
+  city          String
+  startTime     DateTime
+  endTime       DateTime
+  Amenities     String[]
+  imageUrls     String[]
+  groundCourts  groundCourts[]
+  createdAt     DateTime        @default(now())
+  matches       matches[]
+  groundRating  groundRating[]
+  groundBooking groundBooking[]
+}
+
+model groundRating {
+  ratingId String @id @default(uuid())
+  rating   Int
+  userId   String
+  user     user   @relation(fields: [userId], references: [userId])
+  groundId String
+  ground   ground @relation(fields: [groundId], references: [groundId])
+}
+
+model groundCourts {
+  groundCourtId   String          @id @default(uuid())
+  courtName       String
+  pricePerHour    Float
+  sportType       sports
+  dimentions      String?
+  surfaceType     String?
+  playersCapacity Int
+  groundId        String
+  ground          ground          @relation(fields: [groundId], references: [groundId])
+  groundBooking   groundBooking[]
+  createdAt       DateTime        @default(now())
+}
+
+model groundBooking {
+  bookingId           String       @id @default(uuid())
+  duration            Int
+  bookingCost         Float
+  numberOfPlayers     Int
+  dateForPlay         DateTime
+  startTime           DateTime
+  endTime             DateTime
+  courtId             String
+  groundId            String
+  matchId             String?
+  match               matches?     @relation(fields: [matchId], references: [matchId])
+  court               groundCourts @relation(fields: [courtId], references: [groundCourtId])
+  ground              ground       @relation(fields: [groundId], references: [groundId])
+  bookBy              String
+  user                user         @relation(fields: [bookBy], references: [userId])
+  razorpay_order_id   String       @default("")
+  razorpay_payment_id String       @default("")
+  razorpay_signature  String       @default("")
+  createdAt           DateTime     @default(now())
+
+  @@unique([matchId, groundId])
+}
+
+model matches {
+  matchId         String            @id @default(uuid())
+  name            String
+  description     String?           @db.VarChar(1024)
+  date            DateTime
+  sportType       sports
+  noOfPlayers     Int               @default(1)
+  teamMembers     teamMembers[]
+  groundId        String
+  ground          ground            @relation(fields: [groundId], references: [groundId])
+  hostId          String
+  user            user              @relation(fields: [hostId], references: [userId], onDelete: Cascade)
+  createdAt       DateTime          @default(now())
+  pendingRequests pendingRequests[]
+  groundBooking   groundBooking[]
+}
+
+model teamMembers {
+  id      String  @id @default(uuid())
+  matchId String
+  userId  String
+  isHost  Boolean @default(false)
+  match   matches @relation(fields: [matchId], references: [matchId], onDelete: Cascade)
+  user    user    @relation(fields: [userId], references: [userId], onDelete: Cascade)
+}
+
+model pendingRequests {
+  id      String  @id @default(uuid())
+  matchId String
+  match   matches @relation(fields: [matchId], references: [matchId], onDelete: Cascade)
+  userId  String
+  user    user    @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@unique([matchId, userId])
+}
