@@ -21,7 +21,7 @@ export class Ground {
                         { latitude, longitude }
                     )
                 }))
-                .filter(ground => ground.distance <= 1000)
+                .filter(ground => ground.distance <= 10000)
                 .sort((a, b) => a.distance - b.distance);
 
 
